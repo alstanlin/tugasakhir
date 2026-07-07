@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1920, initial-scale=1.0">
+  <title>CAT-Net Architecture</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f0f0f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    /* ─── Fixed 16:9 canvas ─── */
+    #archCanvas {
+      width: 1920px;
+      height: 1080px;
+      background: #ffffff;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 50px;
+      flex-shrink: 0;
+    }
+
+    .title {
+      font-size: 26px;
+      font-weight: 800;
+      color: #1a1a2e;
+      text-align: center;
+      margin-bottom: 4px;
+      letter-spacing: 0.3px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: #6b7280;
+      text-align: center;
+      margin-bottom: 36px;
+      font-weight: 500;
+    }
+
+    /* ─── Main horizontal flow ─── */
+    .flow {
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+
+    /* ─── Arrow connectors ─── */
+    .arrow {
+      display: flex;
+      align-items: center;
+      padding: 0 4px;
+      color: #9ca3af;
+      flex-shrink: 0;
+    }
+
+    .arrow svg {
+      width: 28px;
+      height: 14px;
+    }
+
+    .arrow.sm svg { width: 20px; }
+
+    /* ─── Block group ─── */
+    .block-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .block-group .group-label {
+      font-size: 10.5px;
+      font-weight: 700;
+      color: #374151;
+      text-align: center;
+      margin-bottom: 5px;
+      letter-spacing: 0.2px;
+      white-space: nowrap;
+      line-height: 1.35;
+    }
+
+    .block-group .group-dim {
+      font-size: 10px;
+      color: #6b7280;
+      text-align: center;
+      margin-top: 5px;
+      font-weight: 600;
+    }
+
+    /* ─── Layer boxes ─── */
+    .layer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 10px;
+      font-weight: 600;
+      border-radius: 6px;
+      padding: 8px 12px;
+      min-width: 100px;
+      line-height: 1.3;
+      white-space: nowrap;
+    }
+
+    .layer.input        { background: #e5e7eb; color: #374151; border: 1.5px solid #d1d5db; min-width: 80px; }
+    .layer.conv-bn      { background: #64b5f6; color: #fff; border: 1.5px solid #42a5f5; }
+    .layer.attention     { background: #ffb74d; color: #fff; border: 1.5px solid #ffa726; }
+    .layer.pool         { background: #81c784; color: #fff; border: 1.5px solid #66bb6a; }
+    .layer.transformer   { background: #e57373; color: #fff; border: 1.5px solid #ef5350; }
+    .layer.add-norm     { background: #64b5f6; color: #fff; border: 1.5px solid #42a5f5; }
+    .layer.ffn          { background: #ffb74d; color: #fff; border: 1.5px solid #ffa726; }
+    .layer.gap          { background: #ce93d8; color: #fff; border: 1.5px solid #ba68c8; }
+    .layer.dense1       { background: #81c784; color: #fff; border: 1.5px solid #66bb6a; }
+    .layer.dense2       { background: #90caf9; color: #fff; border: 1.5px solid #64b5f6; }
+    .layer.output       { background: #e5e7eb; color: #374151; border: 1.5px solid #d1d5db; min-width: 72px; }
+
+    /* ─── Transformer Encoder bracket ─── */
+    .transformer-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      flex-shrink: 0;
+      position: relative;
+      border: 2px dashed #bdbdbd;
+      border-radius: 10px;
+      padding: 26px 14px 12px;
+    }
+
+    .transformer-group::before {
+      content: 'Transformer Encoder';
+      position: absolute;
+      top: -11px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #fff;
+      padding: 0 10px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #757575;
+      white-space: nowrap;
+    }
+
+    .transformer-inner {
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+
+    /* ─── Plus sign ─── */
+    .plus-sign {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 2px solid #9ca3af;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 700;
+      color: #6b7280;
+      flex-shrink: 0;
+      background: #fff;
+    }
+
+    /* ─── Legend ─── */
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-top: 36px;
+      justify-content: center;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: #374151;
+      font-weight: 500;
+    }
+
+    .legend-swatch {
+      width: 18px;
+      height: 12px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    .sw-conv  { background: #64b5f6; }
+    .sw-attn  { background: #ffb74d; }
+    .sw-pool  { background: #81c784; }
+    .sw-mha   { background: #e57373; }
+    .sw-gap   { background: #ce93d8; }
+    .sw-dense { background: #90caf9; }
+
+    /* ─── Save button (outside canvas) ─── */
+    .save-btn {
+      position: fixed;
+      top: 16px;
+      right: 20px;
+      padding: 10px 24px;
+      background: #1a1a2e;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      z-index: 100;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      transition: background 0.2s;
+    }
+    .save-btn:hover { background: #c8102e; }
+  </style>
+</head>
+<body>
+
+<button class="save-btn" onclick="savePNG()">💾 Save as PNG (1920×1080)</button>
+
+<div id="archCanvas">
+  <div class="title">Arsitektur CAT-Net (Convolutional-Attention-Transformer Network)</div>
+  <p class="subtitle">Hybrid Deep Learning untuk Klasifikasi Aritmia pada Sinyal EKG Single-Lead &nbsp;|&nbsp; Islam et al. (2024)</p>
+
+  <div class="flow">
+
+    <!-- ═══ INPUT ═══ -->
+    <div class="block-group">
+      <div class="group-label">Input ECG</div>
+      <div class="layer input">Input<br>ECG</div>
+      <div class="group-dim">2500 × 1</div>
+    </div>
+
+    <div class="arrow"><svg viewBox="0 0 28 14"><path d="M2 7h22M19 2l6 5-6 5" fill="none" stroke="#9ca3af" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+
+    <!-- ═══ CNN BLOCK 1 ═══ -->
+    <div class="block-group">
+      <div class="group-label">1st Conv, BN, Attn.<br>& Pooling Layers</div>
+      <div class="layer conv-bn">Conv1D + BN</div>
+      <div class="layer attention">Channel & Spatial<br>Attention</div>
+      <div class="layer pool">MaxPool</div>
+      <div class="group-dim">(1250 × 16)</div>
+    </div>
+
+    <div class="arrow"><svg viewBox="0 0 28 14"><path d="M2 7h22M19 2l6 5-6 5" fill="none" stroke="#9ca3af" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+
+    <!-- ═══ CNN BLOCK 2 ═══ -->
+    <div class="block-group">
+      <div class="group-label">2nd Conv, BN, Attn.<br>& Pooling Layers</div>
+      <div class="layer conv-bn">Conv1D + BN</div>
+      <div class="layer attention">Channel & Spatial<br>Attention</div>
+      <div class="layer pool">MaxPool</div>
+      <div class="group-dim">(625 × 32)</div>
+    </div>
+
+    <div class="arrow"><svg viewBox="0 0 28 14"><path d="M2 7h22M19 2l6 5-6 5" fill="none" stroke="#9ca3af" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+
+    <!-- ═══ CNN BLOCK 3 ═══ -->
+    <div class="block-group">
+      <div class="group-label">3rd Conv, BN, Attn.<br>& Pooling Layers</div>
+      <div class="layer conv-bn">Conv1D + BN</div>
+      <div class="layer attention">Channel & Spatial<br>Attention</div>
+      <div class="layer pool">AvgPool</div>
+      <div class="group-dim">(313 × 64)</div>
+    </div>
+
+    <div class="arrow"><svg viewBox="0 0 28 14"><path d="M2 7h22M19 2l6 5-6 5" fill="none" stroke="#9ca3af" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+
+    <!-- ═══ CNN BLOCK 4 ═══ -->
+    <div class="block-group">
+      <div class="group-label">4th Conv, BN<br>Layers</div>
+      <div class="layer conv-bn">Conv1D + BN</div>
+      <div class="group-dim">(313 × 128)</div>
+    </div>
+
+    <div class="arrow"><svg viewBox="0 0 28 14"><path d="M2 7h22M19 2l6 5-6 5" fill="none" stroke="#9ca3af" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+
+    <!-- ═══ POSITIONAL ENCODING ═══ -->
+    <div class="block-group">
+      <div class="group-label">Positional<br>Encoding</div>
+      <div class="plus-sign">⊕</div>
+      <div class="group-dim">(313 × 128)</div>
+    </div>
+
+    <div class="arrow"><svg viewBox="0 0 28 14"><path d="M2 7h22M19 2l6 5-6 5" fill="none" stroke="#9ca3af" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+
+    <!-- ═══ TRANSFORMER ENCODER ═══ -->
+    <div class="transformer-group">
+      <div class="transformer-inner">
+        <div class="block-group">
+          <div class="layer transformer">Multi-Head<br>Attention</div>
+          <div class="group-dim" style="font-size:8.5px;color:#9ca3af;margin-top:3px;">V &nbsp; K &nbsp; Q</div>
+        </div>
+        <div class="arrow sm"><svg viewBox="0 0 20 14"><path d="M2 7h14M12 2l5 5-5 5" fill="none" stroke="#9ca3af" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="block-group">
+          <div class="layer add-norm">Add &<br>Norm</div>
+        </div>
+        <div class="arrow sm"><svg viewBox="0 0 20 14"><path d="M2 7h14M12 2l5 5-5 5" fill="none" stroke="#9ca3af" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="block-group">
+          <div class="layer ffn">Feed<br>Forward</div>
+        </div>
+        <div class="arrow sm"><svg viewBox="0 0 20 14"><path d="M2 7h14M12 2l5 5-5 5" fill="none" stroke="#9ca3af" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="block-group">
+          <div class="layer add-norm">Add &<br>Norm</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arrow"><svg viewBox="0 0 28 14"><path d="M2 7h22M19 2l6 5-6 5" fill="none" stroke="#9ca3af" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+
+    <!-- ═══ GAP ═══ -->
+    <div class="block-group">
+      <div class="group-label">Global Avg.<br>Pooling</div>
+      <div class="layer gap">GAP1D</div>
+      <div class="group-dim">128</div>
+    </div>
+
+    <div class="arrow"><svg viewBox="0 0 28 14"><path d="M2 7h22M19 2l6 5-6 5" fill="none" stroke="#9ca3af" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+
+    <!-- ═══ DENSE 1 ═══ -->
+    <div class="block-group">
+      <div class="group-label">Dense<br>Layer 1</div>
+      <div class="layer dense1">Dense +<br>Dropout</div>
+      <div class="group-dim">128</div>
+    </div>
+
+    <div class="arrow"><svg viewBox="0 0 28 14"><path d="M2 7h22M19 2l6 5-6 5" fill="none" stroke="#9ca3af" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+
+    <!-- ═══ DENSE 2 ═══ -->
+    <div class="block-group">
+      <div class="group-label">Dense Layer 2<br>(Output)</div>
+      <div class="layer dense2">Dense<br>(Softmax)</div>
+      <div class="group-dim">2</div>
+    </div>
+
+    <div class="arrow"><svg viewBox="0 0 28 14"><path d="M2 7h22M19 2l6 5-6 5" fill="none" stroke="#9ca3af" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+
+    <!-- ═══ OUTPUT ═══ -->
+    <div class="block-group">
+      <div class="group-label">Output Class<br>of Arrhythmia</div>
+      <div class="layer output">Normal</div>
+      <div class="layer output" style="margin-top:4px;">AFib</div>
+    </div>
+
+  </div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <div class="legend-item"><div class="legend-swatch sw-conv"></div>Convolutional & BN Layers</div>
+    <div class="legend-item"><div class="legend-swatch sw-attn"></div>Attention Layer</div>
+    <div class="legend-item"><div class="legend-swatch sw-pool"></div>Pooling / Dense Layer</div>
+    <div class="legend-item"><div class="legend-swatch sw-mha"></div>Multi-Head Attention</div>
+    <div class="legend-item"><div class="legend-swatch sw-gap"></div>GlobalAveragePooling1D</div>
+    <div class="legend-item"><div class="legend-swatch sw-dense"></div>Dense Layer 2 (Output)</div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script>
+  async function savePNG() {
+    const el = document.getElementById('archCanvas');
+    const canvas = await html2canvas(el, {
+      width: 1920,
+      height: 1080,
+      scale: 2,
+      backgroundColor: '#ffffff',
+      useCORS: true,
+      logging: false,
+      windowWidth: 1920,
+      windowHeight: 1080
+    });
+    const link = document.createElement('a');
+    link.download = 'CAT-Net_Architecture_1920x1080.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,123 @@
+# ===== Loading Data EKG =====
+# ===== Import Libraries yang Digunakan =====
+
+from turtle import pd
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import pywt
+from scipy.signal import butter, filtfilt, find_peaks
+from scipy.stats import zscore
+
+df = pd.read_csv("/Users/alstanlin/Desktop/CAT-NET for Arrhythmia Detection/Data Wearable EKG-Nano (Berhasil)/Wearable EKG-Nano12.csv")
+
+# ===== Visualisasi Sinyal EKG =====
+
+ekg = df.iloc[:, 2]
+fs = 250
+
+waktu = range(len(ekg))
+
+# ===== Windowing Sinyal 10 Detik =====
+
+def potong_jendela_10_detik(ekg, fs=250):
+    ukuran_jendela = int(10 * fs)
+    jendela_terkumpul = []
+
+    for i in range(0,len(ekg) - ukuran_jendela + 1,ukuran_jendela):
+        potongan = ekg[i : i + ukuran_jendela]
+        jendela_terkumpul.append(potongan)
+    return np.array(jendela_terkumpul)
+
+matriks_jendela = potong_jendela_10_detik(ekg,fs=fs)
+
+# ===== Bandpass Filter Sinyal EKG =====
+
+def bandpass_filter(signal_data,lowcut=0.5,highcut=40,fs=250,order=3):
+    nyquist = 0.5 * fs
+    low = lowcut / nyquist
+    high = highcut / nyquist
+    b, a = butter(order,[low, high],btype='band')
+    filtered_signal = filtfilt(b,a,signal_data)
+    return filtered_signal
+
+# ===== Denoising Sinyal EKG dengan Wavelet Soft-Thresholding (Motion Artifact Removal) =====
+
+def denoise(signal_data, wavelet='db5', level=5):
+    coeffs = pywt.wavedec(signal_data, wavelet=wavelet, level=level)
+    coeffs[0] = np.zeros_like(coeffs[0])
+    detail_highest = coeffs[-1]
+    sigma = np.median(np.abs(detail_highest)) / 0.6745
+    n = len(signal_data)
+    universal_threshold = sigma * np.sqrt(2 * np.log(n))
+    for i in range(1, len(coeffs)):  # Skip approximation (index 0)
+        coeffs[i] = pywt.threshold(coeffs[i], value=universal_threshold, mode='soft')
+    reconstructed = pywt.waverec(coeffs, wavelet=wavelet)
+    return reconstructed[:len(signal_data)]
+
+# ===== Proses Filtering, Denoising, dan Deteksi R-Peak =====
+
+hasil_filter = []          # Sinyal SETELAH zscore (untuk analisis fitur)
+hasil_filter_no_norm = []  # Sinyal SEBELUM zscore (untuk hitung SNR)
+hasil_peak = []
+
+for idx, window in enumerate(matriks_jendela):
+    filtered = bandpass_filter(window)
+    denoised = denoise(filtered)
+    
+    # Simpan SEBELUM zscore (untuk SNR)
+    hasil_filter_no_norm.append(denoised)
+    
+    # Normalisasi untuk deteksi fitur
+    normalized = zscore(denoised)
+    hasil_filter.append(normalized)
+
+    # Pan-Tompkins R-Peak Detection
+    diff_signal = np.diff(normalized)
+    squared_signal = diff_signal ** 2
+    window_size = int(0.15 * fs)
+    mwi_signal = np.convolve(squared_signal, np.ones(window_size)/window_size, mode='same')
+
+    threshold_peak = 0.2 * np.max(mwi_signal)
+    peaks_mwi, _ = find_peaks(mwi_signal, height=threshold_peak, distance=int(0.25 * fs))
+
+    r_peaks = []
+    search_window = int(0.1 * fs)
+    for peak in peaks_mwi:
+        start = max(0, peak - search_window)
+        end = min(len(normalized), peak + search_window)
+        local_peak = np.argmax(normalized[start:end])
+        r_peak = start + local_peak
+        r_peaks.append(r_peak)
+
+    r_peaks = np.array(r_peaks)
+    hasil_peak.append(r_peaks)
+
+# ===== Evaluasi Kualitas Sinyal dengan SNR =====
+
+all_snr = []
+
+for window_ke in range(len(matriks_jendela)):
+    # x(n) = sinyal setelah bandpass (BUKAN sinyal mentah)
+    x_n = bandpass_filter(matriks_jendela[window_ke])
+    
+    # x̂(n) = sinyal setelah bandpass + wavelet
+    x_hat_n = hasil_filter_no_norm[window_ke]
+    
+    # e(n) = x(n) - x̂(n) → noise yang dihilangkan wavelet
+    e_n = x_n[:len(x_hat_n)] - x_hat_n
+    
+    signal_power = np.mean(x_hat_n ** 2)
+    noise_power = np.mean(e_n ** 2)
+    
+    if noise_power == 0:
+        continue
+    
+    snr_db = 10 * np.log10(signal_power / noise_power)
+    all_snr.append(snr_db)
+
+all_snr = np.array(all_snr)
+print(f"\nMean SNR: {np.mean(all_snr):.2f} dB")
+print(f"Std SNR : {np.std(all_snr):.2f} dB")
+print(f"Min SNR  : {np.min(all_snr):.2f} dB")
+print(f"Max SNR  : {np.max(all_snr):.2f} dB")

@@ -1,0 +1,1564 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulasi Sidang – Dosen Killer Mode 🔥</title>
+  <meta name="description" content="Simulasi sidang tugas akhir dengan pertanyaan-pertanyaan tajam dari dosen killer.">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0a0a12;
+      --bg-secondary: #12121e;
+      --bg-card: rgba(20, 20, 35, 0.85);
+      --bg-glass: rgba(255, 255, 255, 0.04);
+      --border-glass: rgba(255, 255, 255, 0.08);
+      --accent-red: #ff2d55;
+      --accent-red-glow: rgba(255, 45, 85, 0.3);
+      --accent-orange: #ff9500;
+      --accent-green: #30d158;
+      --accent-green-glow: rgba(48, 209, 88, 0.25);
+      --accent-blue: #0a84ff;
+      --accent-blue-glow: rgba(10, 132, 255, 0.25);
+      --accent-purple: #bf5af2;
+      --accent-gold: #ffd60a;
+      --accent-gold-glow: rgba(255, 214, 10, 0.2);
+      --text-primary: #f5f5f7;
+      --text-secondary: rgba(245, 245, 247, 0.6);
+      --text-muted: rgba(245, 245, 247, 0.35);
+      --radius-lg: 20px;
+      --radius-md: 14px;
+      --radius-sm: 10px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ─── Animated Background ─── */
+    .bg-mesh {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .bg-mesh .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(100px);
+      animation: orbFloat 20s ease-in-out infinite;
+    }
+
+    .bg-mesh .orb:nth-child(1) {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(255, 45, 85, 0.12), transparent 70%);
+      top: -10%; left: -10%;
+      animation-delay: 0s;
+    }
+
+    .bg-mesh .orb:nth-child(2) {
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(10, 132, 255, 0.08), transparent 70%);
+      bottom: -20%; right: -15%;
+      animation-delay: -7s;
+    }
+
+    .bg-mesh .orb:nth-child(3) {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(191, 90, 242, 0.08), transparent 70%);
+      top: 40%; left: 50%;
+      animation-delay: -14s;
+    }
+
+    @keyframes orbFloat {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      25% { transform: translate(40px, -30px) scale(1.1); }
+      50% { transform: translate(-20px, 20px) scale(0.95); }
+      75% { transform: translate(30px, 40px) scale(1.05); }
+    }
+
+    /* ─── Main Container ─── */
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 30px 24px;
+      min-height: 100vh;
+    }
+
+    /* ─── Screen System ─── */
+    .screen {
+      display: none;
+      animation: fadeUp 0.5s ease;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 20px var(--accent-red-glow); }
+      50% { box-shadow: 0 0 40px var(--accent-red-glow), 0 0 60px rgba(255,45,85,0.15); }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+      20%, 40%, 60%, 80% { transform: translateX(4px); }
+    }
+
+    @keyframes confetti-fall {
+      0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+
+    /* ─── Welcome Screen ─── */
+    .welcome-header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .killer-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, rgba(255,45,85,0.15), rgba(255,45,85,0.05));
+      border: 1px solid rgba(255,45,85,0.3);
+      padding: 10px 24px;
+      border-radius: 30px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent-red);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 28px;
+      animation: pulse-glow 3s ease-in-out infinite;
+    }
+
+    .welcome-title {
+      font-size: 42px;
+      font-weight: 900;
+      line-height: 1.15;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-red) 50%, var(--accent-orange) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .welcome-subtitle {
+      font-size: 16px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 600px;
+      margin: 0 auto 12px;
+    }
+
+    .thesis-title-box {
+      background: var(--bg-glass);
+      border: 1px solid var(--border-glass);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 24px 28px;
+      border-radius: var(--radius-md);
+      margin: 32px 0;
+    }
+
+    .thesis-title-box .label {
+      font-size: 11px;
+      color: var(--accent-gold);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 10px;
+    }
+
+    .thesis-title-box .title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1.6;
+    }
+
+    .thesis-title-box .author {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 10px;
+    }
+
+    /* ─── Difficulty Cards ─── */
+    .difficulty-section {
+      margin-top: 36px;
+    }
+
+    .difficulty-section .section-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .difficulty-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .diff-card {
+      background: var(--bg-glass);
+      border: 1.5px solid var(--border-glass);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: var(--radius-md);
+      padding: 24px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .diff-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      border-radius: var(--radius-md) var(--radius-md) 0 0;
+    }
+
+    .diff-card:nth-child(1)::before { background: var(--accent-blue); }
+    .diff-card:nth-child(2)::before { background: var(--accent-orange); }
+    .diff-card:nth-child(3)::before { background: var(--accent-red); }
+
+    .diff-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(255,255,255,0.15);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+    }
+
+    .diff-card:nth-child(1):hover { border-color: rgba(10,132,255,0.4); box-shadow: 0 12px 40px var(--accent-blue-glow); }
+    .diff-card:nth-child(2):hover { border-color: rgba(255,149,0,0.4); box-shadow: 0 12px 40px rgba(255,149,0,0.2); }
+    .diff-card:nth-child(3):hover { border-color: rgba(255,45,85,0.4); box-shadow: 0 12px 40px var(--accent-red-glow); }
+
+    .diff-card .emoji {
+      font-size: 36px;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .diff-card .name {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .diff-card .desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .diff-card .time-badge {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .diff-card:nth-child(1) .time-badge { background: rgba(10,132,255,0.15); color: var(--accent-blue); }
+    .diff-card:nth-child(2) .time-badge { background: rgba(255,149,0,0.15); color: var(--accent-orange); }
+    .diff-card:nth-child(3) .time-badge { background: rgba(255,45,85,0.15); color: var(--accent-red); }
+
+    /* ─── Quiz Screen ─── */
+    .quiz-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      background: var(--bg-glass);
+      border: 1px solid var(--border-glass);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: var(--radius-md);
+      margin-bottom: 20px;
+    }
+
+    .topbar-left { display: flex; align-items: center; gap: 16px; }
+
+    .q-counter {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .q-chapter {
+      padding: 4px 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .q-chapter.bab1 { background: rgba(10,132,255,0.15); color: var(--accent-blue); }
+    .q-chapter.bab2 { background: rgba(191,90,242,0.15); color: var(--accent-purple); }
+    .q-chapter.bab3 { background: rgba(255,149,0,0.15); color: var(--accent-orange); }
+    .q-chapter.bab4 { background: rgba(255,45,85,0.15); color: var(--accent-red); }
+    .q-chapter.bab5 { background: rgba(48,209,88,0.15); color: var(--accent-green); }
+    .q-chapter.umum { background: rgba(255,214,10,0.15); color: var(--accent-gold); }
+
+    .topbar-right { display: flex; align-items: center; gap: 14px; }
+
+    .timer-display {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--accent-green);
+      min-width: 50px;
+      text-align: center;
+      transition: color 0.3s;
+    }
+
+    .timer-display.warning { color: var(--accent-orange); }
+    .timer-display.danger { color: var(--accent-red); animation: shake 0.5s ease infinite; }
+
+    .score-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,214,10,0.1);
+      border: 1px solid rgba(255,214,10,0.2);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent-gold);
+    }
+
+    /* ─── Progress Bar ─── */
+    .progress-track {
+      width: 100%;
+      height: 4px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 2px;
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple), var(--accent-red));
+      border-radius: 2px;
+      transition: width 0.4s ease;
+    }
+
+    /* ─── Question Card ─── */
+    .question-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-glass);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .question-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent-red), var(--accent-orange), var(--accent-gold));
+    }
+
+    .dosen-persona {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-glass);
+    }
+
+    .dosen-avatar {
+      width: 48px; height: 48px;
+      background: linear-gradient(135deg, var(--accent-red), var(--accent-orange));
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+
+    .dosen-info .dosen-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .dosen-info .dosen-mood {
+      font-size: 12px;
+      color: var(--accent-red);
+      font-weight: 500;
+    }
+
+    .question-text {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1.65;
+      margin-bottom: 8px;
+    }
+
+    .question-context {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-style: italic;
+      line-height: 1.6;
+      margin-bottom: 0;
+      padding: 10px 14px;
+      background: rgba(255,255,255,0.02);
+      border-radius: var(--radius-sm);
+      border-left: 3px solid rgba(255,45,85,0.3);
+    }
+
+    /* ─── Answer Area ─── */
+    .answer-area {
+      margin-bottom: 16px;
+    }
+
+    .answer-textarea {
+      width: 100%;
+      min-height: 150px;
+      background: var(--bg-glass);
+      border: 1.5px solid var(--border-glass);
+      border-radius: var(--radius-md);
+      padding: 18px 20px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      color: var(--text-primary);
+      line-height: 1.7;
+      resize: vertical;
+      transition: border-color 0.3s, box-shadow 0.3s;
+      outline: none;
+    }
+
+    .answer-textarea::placeholder {
+      color: var(--text-muted);
+    }
+
+    .answer-textarea:focus {
+      border-color: rgba(10,132,255,0.5);
+      box-shadow: 0 0 0 3px rgba(10,132,255,0.1);
+    }
+
+    .answer-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      padding: 12px 28px;
+      border-radius: var(--radius-sm);
+      border: none;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-blue), #0066cc);
+      color: white;
+      box-shadow: 0 4px 16px var(--accent-blue-glow);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px var(--accent-blue-glow);
+    }
+
+    .btn-ghost {
+      background: var(--bg-glass);
+      border: 1px solid var(--border-glass);
+      color: var(--text-secondary);
+    }
+
+    .btn-ghost:hover {
+      background: rgba(255,255,255,0.08);
+      color: var(--text-primary);
+    }
+
+    .btn-reveal {
+      background: linear-gradient(135deg, var(--accent-green), #1aab42);
+      color: white;
+      box-shadow: 0 4px 16px var(--accent-green-glow);
+    }
+
+    .btn-reveal:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px var(--accent-green-glow);
+    }
+
+    /* ─── Key Answer ─── */
+    .key-answer {
+      background: rgba(48, 209, 88, 0.06);
+      border: 1px solid rgba(48, 209, 88, 0.2);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      margin-top: 16px;
+      animation: fadeUp 0.4s ease;
+    }
+
+    .key-answer .ka-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent-green);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .key-answer .ka-body {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+
+    .key-answer .ka-body strong {
+      color: var(--text-primary);
+    }
+
+    /* ─── Self-Rating ─── */
+    .rating-section {
+      margin-top: 20px;
+      padding: 20px 24px;
+      background: var(--bg-glass);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-md);
+    }
+
+    .rating-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+    }
+
+    .rating-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .rate-btn {
+      flex: 1;
+      padding: 10px;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid var(--border-glass);
+      background: transparent;
+      color: var(--text-secondary);
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      text-align: center;
+    }
+
+    .rate-btn:hover { border-color: rgba(255,255,255,0.2); color: var(--text-primary); }
+
+    .rate-btn.rate-bad:hover, .rate-btn.rate-bad.selected {
+      border-color: rgba(255,45,85,0.5);
+      background: rgba(255,45,85,0.1);
+      color: var(--accent-red);
+    }
+
+    .rate-btn.rate-ok:hover, .rate-btn.rate-ok.selected {
+      border-color: rgba(255,149,0,0.5);
+      background: rgba(255,149,0,0.1);
+      color: var(--accent-orange);
+    }
+
+    .rate-btn.rate-good:hover, .rate-btn.rate-good.selected {
+      border-color: rgba(48,209,88,0.5);
+      background: rgba(48,209,88,0.1);
+      color: var(--accent-green);
+    }
+
+    .rate-btn.rate-great:hover, .rate-btn.rate-great.selected {
+      border-color: rgba(255,214,10,0.5);
+      background: rgba(255,214,10,0.1);
+      color: var(--accent-gold);
+    }
+
+    /* ─── Results Screen ─── */
+    .results-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .results-grade {
+      font-size: 80px;
+      font-weight: 900;
+      margin-bottom: 8px;
+      line-height: 1;
+    }
+
+    .results-grade.grade-a {
+      background: linear-gradient(135deg, var(--accent-gold), var(--accent-orange));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
+    .results-grade.grade-b {
+      background: linear-gradient(135deg, var(--accent-green), var(--accent-blue));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
+    .results-grade.grade-c {
+      background: linear-gradient(135deg, var(--accent-orange), var(--accent-red));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
+    .results-grade.grade-d {
+      background: linear-gradient(135deg, var(--accent-red), #cc0033);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
+    .results-verdict {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .results-subtitle {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: var(--bg-glass);
+      border: 1px solid var(--border-glass);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: var(--radius-md);
+      padding: 20px 16px;
+      text-align: center;
+    }
+
+    .stat-card .stat-value {
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .stat-card .stat-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-card:nth-child(1) .stat-value { color: var(--accent-gold); }
+    .stat-card:nth-child(2) .stat-value { color: var(--accent-green); }
+    .stat-card:nth-child(3) .stat-value { color: var(--accent-orange); }
+    .stat-card:nth-child(4) .stat-value { color: var(--accent-red); }
+
+    /* ─── Results Breakdown ─── */
+    .breakdown-section {
+      margin-bottom: 24px;
+    }
+
+    .breakdown-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .breakdown-item {
+      background: var(--bg-glass);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .breakdown-item:hover {
+      border-color: rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+    }
+
+    .breakdown-item .bi-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .breakdown-item .bi-q {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      flex: 1;
+      margin-right: 12px;
+      line-height: 1.5;
+    }
+
+    .breakdown-item .bi-score {
+      padding: 4px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .bi-score.s-great { background: rgba(255,214,10,0.15); color: var(--accent-gold); }
+    .bi-score.s-good { background: rgba(48,209,88,0.15); color: var(--accent-green); }
+    .bi-score.s-ok { background: rgba(255,149,0,0.15); color: var(--accent-orange); }
+    .bi-score.s-bad { background: rgba(255,45,85,0.15); color: var(--accent-red); }
+    .bi-score.s-skip { background: rgba(255,255,255,0.06); color: var(--text-muted); }
+
+    .breakdown-item .bi-detail {
+      display: none;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border-glass);
+    }
+
+    .breakdown-item.open .bi-detail {
+      display: block;
+    }
+
+    .bi-detail .your-answer {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 10px;
+    }
+
+    .bi-detail .key-answer-mini {
+      font-size: 12px;
+      color: var(--accent-green);
+      line-height: 1.6;
+      padding: 10px 14px;
+      background: rgba(48,209,88,0.05);
+      border-radius: var(--radius-sm);
+    }
+
+    .results-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 32px;
+    }
+
+    .btn-lg {
+      padding: 16px 36px;
+      font-size: 15px;
+    }
+
+    /* ─── Confetti ─── */
+    .confetti-piece {
+      position: fixed;
+      z-index: 999;
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      animation: confetti-fall 3s ease-out forwards;
+    }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 768px) {
+      .container { padding: 20px 16px; }
+      .welcome-title { font-size: 28px; }
+      .difficulty-grid { grid-template-columns: 1fr; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .question-text { font-size: 16px; }
+      .rating-buttons { flex-wrap: wrap; }
+    }
+
+    /* ─── Killer emoji bounce ─── */
+    @keyframes killer-bounce {
+      0%, 100% { transform: scale(1) rotate(0deg); }
+      25% { transform: scale(1.2) rotate(-5deg); }
+      75% { transform: scale(1.15) rotate(5deg); }
+    }
+
+    .killer-emoji {
+      display: inline-block;
+      animation: killer-bounce 2s ease-in-out infinite;
+    }
+
+    /* ─── Dosen Comment ─── */
+    .dosen-comment {
+      margin-top: 12px;
+      padding: 12px 16px;
+      background: rgba(255,45,85,0.06);
+      border-left: 3px solid var(--accent-red);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      font-size: 13px;
+      color: var(--accent-red);
+      font-style: italic;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <!-- Background Mesh -->
+  <div class="bg-mesh">
+    <div class="orb"></div>
+    <div class="orb"></div>
+    <div class="orb"></div>
+  </div>
+
+  <div class="container">
+
+    <!-- ════════ WELCOME SCREEN ════════ -->
+    <div class="screen active" id="screenWelcome">
+      <div class="welcome-header">
+        <div class="killer-badge">
+          <span class="killer-emoji">🔥</span> DOSEN KILLER MODE <span class="killer-emoji">🔥</span>
+        </div>
+        <h1 class="welcome-title">Simulasi Sidang<br>Tugas Akhir</h1>
+        <p class="welcome-subtitle">
+          Persiapkan dirimu menghadapi pertanyaan-pertanyaan tajam, kritis, dan menantang dari <strong>dosen killer</strong>. 
+          Tidak ada pertanyaan yang mudah di sini.
+        </p>
+      </div>
+
+      <div class="thesis-title-box">
+        <div class="label">Judul Tugas Akhir</div>
+        <div class="title">Analisis Kinerja Wearable Elektrokardiogram Menggunakan Elektroda Nanokomposit Berbasis Convolutional Neural Network untuk Mendeteksi Aritmia</div>
+        <div class="author">Alfonso Liguori Stanlin Dyas — NIM 1105220040<br>S1 Teknik Biomedis • Universitas Telkom</div>
+      </div>
+
+      <div class="difficulty-section">
+        <div class="section-title">Pilih Level Kesulitan</div>
+        <div class="difficulty-grid">
+          <div class="diff-card" onclick="startQuiz('easy')">
+            <span class="emoji">🎯</span>
+            <div class="name">Dosen Baik</div>
+            <div class="desc">Pertanyaan dasar tentang metodologi dan hasil</div>
+            <span class="time-badge">⏱ 120 detik/soal</span>
+          </div>
+          <div class="diff-card" onclick="startQuiz('medium')">
+            <span class="emoji">⚔️</span>
+            <div class="name">Dosen Kritis</div>
+            <div class="desc">Pertanyaan mendalam dan menggali kelemahan</div>
+            <span class="time-badge">⏱ 90 detik/soal</span>
+          </div>
+          <div class="diff-card" onclick="startQuiz('hard')">
+            <span class="emoji">💀</span>
+            <div class="name">Dosen Killer</div>
+            <div class="desc">Pertanyaan brutal yang menyerang fondasi penelitian</div>
+            <span class="time-badge">⏱ 60 detik/soal</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════ QUIZ SCREEN ════════ -->
+    <div class="screen" id="screenQuiz">
+      <div class="quiz-topbar">
+        <div class="topbar-left">
+          <span class="q-counter" id="qCounter">1 / 30</span>
+          <span class="q-chapter" id="qChapter">BAB I</span>
+        </div>
+        <div class="topbar-right">
+          <div class="score-badge" id="scoreBadge">⭐ <span id="scoreDisplay">0</span></div>
+          <div class="timer-display" id="timerDisplay">60</div>
+        </div>
+      </div>
+
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+      </div>
+
+      <div class="question-card" id="questionCard">
+        <div class="dosen-persona">
+          <div class="dosen-avatar">👿</div>
+          <div class="dosen-info">
+            <div class="dosen-name" id="dosenName">Prof. Dr. Killer</div>
+            <div class="dosen-mood" id="dosenMood">Sedang tidak sabaran...</div>
+          </div>
+        </div>
+        <div class="question-text" id="questionText"></div>
+        <div class="question-context" id="questionContext" style="display:none;"></div>
+      </div>
+
+      <div class="answer-area">
+        <textarea class="answer-textarea" id="answerInput" placeholder="Ketik jawabanmu di sini... (atau tekan 'Lihat Kunci Jawaban' jika ingin melihat jawabannya langsung)"></textarea>
+      </div>
+
+      <div class="answer-actions">
+        <button class="btn btn-ghost" id="btnSkip" onclick="skipQuestion()">⏭ Lewati</button>
+        <button class="btn btn-reveal" id="btnReveal" onclick="revealAnswer()">🔑 Lihat Kunci Jawaban</button>
+        <button class="btn btn-primary" id="btnNext" onclick="nextQuestion()">Lanjut →</button>
+      </div>
+
+      <div id="keyAnswerArea"></div>
+      <div id="ratingArea"></div>
+    </div>
+
+    <!-- ════════ RESULTS SCREEN ════════ -->
+    <div class="screen" id="screenResults">
+      <div class="results-header">
+        <div class="results-grade" id="resGrade">B+</div>
+        <div class="results-verdict" id="resVerdict">Cukup Siap!</div>
+        <div class="results-subtitle" id="resSubtitle">Masih ada beberapa area yang perlu diperkuat</div>
+      </div>
+
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-card">
+          <div class="stat-value" id="statScore">0</div>
+          <div class="stat-label">Total Skor</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statGreat">0</div>
+          <div class="stat-label">Sangat Baik</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statOk">0</div>
+          <div class="stat-label">Perlu Latihan</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statBad">0</div>
+          <div class="stat-label">Harus Diperbaiki</div>
+        </div>
+      </div>
+
+      <div class="breakdown-section" id="breakdownSection">
+        <div class="breakdown-title">📋 Detail Per Pertanyaan</div>
+      </div>
+
+      <div class="results-actions">
+        <button class="btn btn-ghost btn-lg" onclick="location.reload()">🔄 Mulai Ulang</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+// ════════════════════════════════════════
+// QUESTION DATABASE — DOSEN KILLER EDITION
+// ════════════════════════════════════════
+
+const QUESTIONS = {
+  easy: [
+    {
+      chapter: 'bab1', chapterLabel: 'BAB I',
+      question: 'Jelaskan secara singkat apa tujuan utama dari tugas akhir Anda!',
+      context: 'Pertanyaan pembuka — pastikan Anda bisa menjelaskan esensi penelitian dalam 1-2 kalimat.',
+      keyAnswer: 'Tujuan utama adalah <strong>menganalisis kinerja wearable EKG dengan elektroda nanokomposit silvertape (AgNP)</strong> dan mengevaluasi performa model <strong>CAT-Net</strong> (Convolutional-Attention-Transformer Network) dalam <strong>mengklasifikasikan aritmia (Normal vs AFib)</strong> pada sinyal EKG single-lead.',
+      dosenComment: 'Kalau tujuannya saja tidak bisa dijelaskan dengan jelas, bagaimana mau mempresentasikan hasil?'
+    },
+    {
+      chapter: 'bab1', chapterLabel: 'BAB I',
+      question: 'Mengapa Anda memilih Atrial Fibrillation (AFib) sebagai fokus aritmia? Bukankah ada jenis aritmia lain yang juga penting?',
+      context: 'Penguji ingin tahu alasan pemilihan AFib, bukan aritmia lain.',
+      keyAnswer: 'AFib dipilih karena merupakan <strong>jenis aritmia paling umum</strong> di dunia, dengan ciri khas yang dapat dideteksi dari EKG single-lead: <strong>tidak ada gelombang P yang jelas</strong> dan <strong>R-R interval ireguler</strong>. Selain itu, data training yang tersedia (Kaggle) mendukung klasifikasi 2 kelas (Normal vs AFib). Memperluas ke multi-kelas membutuhkan <strong>data yang lebih besar dan bervariasi</strong>, yang menjadi saran pengembangan.',
+      dosenComment: 'Anda harus tahu posisi penelitian Anda — jangan hanya ikut-ikutan topik yang sedang tren.'
+    },
+    {
+      chapter: 'bab2', chapterLabel: 'BAB II',
+      question: 'Apa itu sinyal EKG dan komponen-komponen utamanya?',
+      context: 'Pertanyaan fundamental tentang dasar teori.',
+      keyAnswer: 'EKG (Elektrokardiogram) merekam <strong>aktivitas listrik jantung</strong> melalui elektroda pada permukaan tubuh. Komponen utama: <strong>Gelombang P</strong> (depolarisasi atrium), <strong>Kompleks QRS</strong> (depolarisasi ventrikel — komponen terbesar), <strong>Gelombang T</strong> (repolarisasi ventrikel). <strong>R-R interval</strong> adalah jarak antar R-peak berurutan yang digunakan untuk menghitung heart rate dan variabilitas irama.',
+      dosenComment: 'Ini dasar. Kalau ini tidak bisa, saya pertanyakan apakah Anda benar-benar membaca buku referensi.'
+    },
+    {
+      chapter: 'bab2', chapterLabel: 'BAB II',
+      question: 'Jelaskan perbedaan antara elektroda konvensional (Ag/AgCl) dan elektroda nanokomposit!',
+      context: 'Dasar perbandingan kedua jenis elektroda.',
+      keyAnswer: 'Elektroda <strong>konvensional Ag/AgCl</strong> menggunakan <strong>gel konduktif (wet electrode)</strong> → impedansi rendah, sinyal lebih bersih, tapi tidak nyaman untuk penggunaan jangka panjang. Elektroda <strong>nanokomposit silvertape (AgNP)</strong> adalah <strong>dry electrode</strong> → tanpa gel, lebih fleksibel dan nyaman, tapi <strong>impedansi kontak lebih tinggi</strong> yang menyebabkan noise lebih besar pada sinyal.',
+      dosenComment: 'Pemahaman dasar material elektroda sangat penting dalam penelitian ini.'
+    },
+    {
+      chapter: 'bab3', chapterLabel: 'BAB III',
+      question: 'Bagaimana alur pre-processing sinyal EKG yang Anda gunakan?',
+      context: 'Tahapan pengolahan sinyal sebelum masuk ke model.',
+      keyAnswer: 'Alur pre-processing: (1) <strong>Windowing 10 detik</strong> (2500 sampel pada fs=250Hz), (2) <strong>Bandpass Filter Butterworth orde 3</strong> dengan cutoff 0.5–40 Hz untuk menghilangkan baseline wander dan noise frekuensi tinggi, (3) <strong>DWT Denoising</strong> menggunakan wavelet db5 level 5 dengan soft-thresholding (universal threshold) untuk menghilangkan noise yang tumpang tindih dengan sinyal utama. Tujuannya: <strong>mempertahankan morfologi PQRST</strong> sambil mengurangi noise.',
+      dosenComment: 'Saya akan gali lebih dalam soal parameter filter ini nanti.'
+    },
+    {
+      chapter: 'bab3', chapterLabel: 'BAB III',
+      question: 'Hardware apa saja yang digunakan dalam wearable EKG Anda?',
+      context: 'Komponen perangkat keras.',
+      keyAnswer: 'Sistem wearable terdiri dari: (1) <strong>Modul EKG AD8232</strong> — single-lead, CMRR 80 dB, Gain 100, tegangan 2-3.5V DC, (2) <strong>Raspberry Pi 5.2</strong> — prosesor BCM2712 Cortex-A76 2.4GHz, WiFi ac, (3) <strong>Baterai Li 1200 mAh</strong> untuk portabilitas, (4) <strong>Elektroda 3 titik pada dada</strong>. Koneksi remote via <strong>RealVNC</strong>, data disimpan ke file CSV dengan sampling rate <strong>250 Hz</strong>.',
+      dosenComment: 'Pastikan Anda paham spesifikasi setiap komponen, bukan sekadar menyebutkan.'
+    },
+    {
+      chapter: 'bab4', chapterLabel: 'BAB IV',
+      question: 'Berapa akurasi klasifikasi yang Anda peroleh dan bagaimana confusion matrix-nya?',
+      context: 'Hasil akhir klasifikasi model.',
+      keyAnswer: 'Model CAT-Net menghasilkan <strong>akurasi testing 91.13%</strong> pada 124 window data primer. Confusion matrix: <strong>TP=13, TN=100, FP=5, FN=6</strong>. Metrik detail: Sensitivity <strong>68.42%</strong>, Specificity <strong>95.24%</strong>, Precision <strong>72.22%</strong>, F1-Score <strong>0.7027</strong>. Model sangat baik mengenali Normal tapi masih perlu peningkatan untuk deteksi AFib.',
+      dosenComment: 'Angka akurasi saja tidak cukup, saya mau tahu interpretasi Anda terhadap setiap metrik.'
+    },
+    {
+      chapter: 'bab4', chapterLabel: 'BAB IV',
+      question: 'Berapa SNR rata-rata masing-masing elektroda?',
+      context: 'Kualitas sinyal akuisisi.',
+      keyAnswer: 'SNR rata-rata elektroda <strong>konvensional: 5.865 dB</strong>, elektroda <strong>nanokomposit: 1.80 dB</strong>. Selisih sekitar <strong>69.3%</strong>. Sinyal nanokomposit masih <strong>didominasi oleh noise dan artefak</strong>, terutama akibat impedansi kontak kulit-elektroda yang lebih tinggi pada dry electrode tanpa gel konduktif.',
+      dosenComment: 'Angka ini menunjukkan banyak hal. Saya harap Anda bisa menginterpretasikannya lebih dalam.'
+    },
+    {
+      chapter: 'bab5', chapterLabel: 'BAB V',
+      question: 'Sebutkan minimal 3 saran pengembangan dari penelitian Anda!',
+      context: 'Saran untuk penelitian selanjutnya.',
+      keyAnswer: '(1) <strong>Peningkatan kualitas elektroda nanokomposit</strong> — mengurangi impedansi kontak, (2) <strong>Validasi labeling oleh dokter spesialis jantung</strong> untuk ground truth yang lebih akurat, (3) <strong>Eksplorasi pre-processing alternatif</strong> seperti Adaptive Noise Cancellation atau Empirical Mode Decomposition, (4) <strong>Pengembangan arsitektur CAT-Net</strong> dengan data primer yang lebih banyak, (5) <strong>Matching impedance</strong> antara elektroda nanokomposit dengan modul AD8232.',
+      dosenComment: 'Saran harus realistis dan berbasis pada kelemahan yang Anda temukan.'
+    },
+    {
+      chapter: 'bab5', chapterLabel: 'BAB V',
+      question: 'Apa kesimpulan utama dari penelitian Anda?',
+      context: 'Simpulan keseluruhan.',
+      keyAnswer: 'Sistem wearable EKG dengan elektroda nanokomposit berbasis CAT-Net <strong>masih memerlukan pengembangan lebih lanjut</strong>. Pre-processing (bandpass + DWT db5) <strong>mampu meningkatkan kualitas sinyal</strong>. SNR nanokomposit (1.80 dB) masih jauh di bawah konvensional (5.865 dB). CAT-Net mencapai <strong>akurasi 91.13%</strong> namun sensitivity hanya <strong>68.42%</strong> — artinya kemampuan mendeteksi AFib masih terbatas. Kualitas sinyal masukan sangat mempengaruhi hasil klasifikasi.',
+      dosenComment: 'Kesimpulan harus menjawab semua rumusan masalah — cek kembali apakah sudah sesuai.'
+    }
+  ],
+
+  medium: [
+    {
+      chapter: 'bab1', chapterLabel: 'BAB I',
+      question: 'Anda menyebutkan "berbasis CNN" di judul, tapi arsitekturnya bukan hanya CNN — ada Attention dan Transformer juga. Apakah judul Anda tidak misleading?',
+      context: 'Pertanyaan kritis tentang kesesuaian judul dengan metode yang digunakan.',
+      keyAnswer: 'Judul menggunakan terminologi "Convolutional Neural Network" karena <strong>CNN merupakan backbone utama</strong> dari arsitektur CAT-Net — 4 blok konvolusi 1D melakukan ekstraksi fitur awal. Attention dan Transformer adalah <strong>komponen pelengkap</strong> yang meningkatkan kemampuan model. Namun memang judul lebih tepat jika menyebutkan <strong>"hybrid deep learning"</strong> atau <strong>"CAT-Net"</strong> secara eksplisit. Ini merupakan <strong>keterbatasan penamaan</strong> yang disesuaikan dengan konvensi judul TA di institusi.',
+      dosenComment: 'Judul adalah kontrak pertama Anda dengan pembaca. Kalau judulnya saja sudah salah, bagaimana isi penelitiannya?'
+    },
+    {
+      chapter: 'bab2', chapterLabel: 'BAB II',
+      question: 'Jelaskan secara detail bagaimana Channel Attention dan Spatial Attention bekerja dalam CAT-Net! Jangan hanya menyebutkan namanya.',
+      context: 'Penguji ingin memastikan pemahaman mendalam tentang mekanisme attention.',
+      keyAnswer: '<strong>Channel Attention</strong>: Menerapkan Global Average Pooling + Global Max Pooling pada fitur, kemudian melalui MLP shared → menghasilkan <strong>bobot per kanal fitur</strong> (mana yang lebih penting). <strong>Spatial Attention</strong>: Menggabungkan rata-rata dan max per channel, lalu melalui konvolusi → menghasilkan <strong>attention map per posisi temporal</strong> (bagian sinyal mana yang lebih relevan). Keduanya bekerja <strong>sequential</strong>: channel dulu, baru spatial, sehingga model bisa fokus pada fitur dan segmen temporal yang paling informatif.',
+      dosenComment: 'Kalau menggunakan metode yang tidak Anda pahami secara mendalam, itu namanya blindly applying — bukan research.'
+    },
+    {
+      chapter: 'bab2', chapterLabel: 'BAB II',
+      question: 'Mengapa menggunakan DWT db5 untuk denoising? Apa kelebihan db5 dibandingkan db4 atau db6? Apa justifikasi ilmiahnya?',
+      context: 'Pertanyaan mendalam soal pemilihan parameter wavelet.',
+      keyAnswer: 'Wavelet <strong>Daubechies-5 (db5)</strong> dipilih karena memiliki <strong>5 vanishing moments</strong> yang memberikan keseimbangan antara resolusi frekuensi dan temporal. db5 memiliki <strong>korelasi tinggi dengan morfologi sinyal EKG</strong>, terutama kompleks QRS yang memiliki transisi tajam. Dibandingkan db4, db5 lebih halus dalam merepresentasikan gelombang P dan T. Dibandingkan db6, db5 lebih efisien secara komputasi dengan panjang filter lebih pendek. Banyak literatur (termasuk Narin & Keser, 2026) mengkonfirmasi <strong>db5 optimal untuk sinyal biomedis</strong>.',
+      dosenComment: 'Setiap parameter harus punya justifikasi, bukan asal pilih dari paper orang lain.'
+    },
+    {
+      chapter: 'bab3', chapterLabel: 'BAB III',
+      question: 'Data training dari Kaggle, data testing dari data primer. Bukankah ini menyebabkan domain shift? Bagaimana Anda menanganinya?',
+      context: 'Isu kritis tentang distribusi data yang berbeda.',
+      keyAnswer: 'Memang terjadi <strong>domain shift</strong> karena data training dan testing berasal dari sumber berbeda (alat berbeda, elektroda berbeda, distribusi noise berbeda). Untuk mitigasi: (1) <strong>Pre-processing identik</strong> diterapkan pada kedua set data (bandpass + DWT), (2) <strong>Normalisasi Z-score</strong> sebelum masuk model, (3) Model dilatih pada data wearable EKG (bukan EKG clinical grade), sehingga <strong>domain lebih mendekati</strong>. Namun ini tetap menjadi <strong>keterbatasan utama</strong> penelitian dan menjadi penyebab penurunan performa pada data primer.',
+      dosenComment: 'Domain shift adalah masalah serius dalam machine learning. Saya harap Anda tidak meremehkannya.'
+    },
+    {
+      chapter: 'bab3', chapterLabel: 'BAB III',
+      question: 'Bagaimana proses labeling data primer dilakukan? Siapa yang memvalidasi? Apakah ada inter-rater reliability?',
+      context: 'Pertanyaan tentang kualitas ground truth label.',
+      keyAnswer: 'Labeling dilakukan secara <strong>semi-otomatis</strong> menggunakan parameter HRV: <strong>R-R interval, SDRR, RMSSD, dan pNN50</strong>. Jika parameter menunjukkan iregularitas tinggi di atas threshold, window dilabeli sebagai AFib. <strong>Tidak ada validasi dari dokter spesialis jantung</strong> dan tidak ada pengukuran inter-rater reliability. Ini merupakan <strong>kelemahan signifikan</strong> yang menjadi saran pengembangan — labeling hanya berdasarkan HRV tanpa morfologi P-wave bisa menyebabkan <strong>bias label</strong>.',
+      dosenComment: 'Tanpa gold standard labeling dari dokter, hasil Anda tidak bisa diklaim memiliki validitas klinis.'
+    },
+    {
+      chapter: 'bab3', chapterLabel: 'BAB III',
+      question: 'Kenapa menggunakan SMOTE? Jelaskan apa itu SMOTE dan bagaimana dampaknya pada training!',
+      context: 'File model Anda bernama catnet_primer_smote.h5 — ini mengindikasikan penggunaan SMOTE.',
+      keyAnswer: '<strong>SMOTE</strong> (Synthetic Minority Over-sampling Technique) digunakan karena distribusi data <strong>tidak seimbang</strong> — Normal: 105 window (84.67%) vs AFib: 19 window (15.33%). SMOTE bekerja dengan <strong>membuat sampel sintetis kelas minoritas (AFib)</strong> berdasarkan interpolasi K-nearest neighbors pada feature space. Dampak: menyeimbangkan distribusi training sehingga model tidak <strong>bias ke kelas mayoritas</strong>. Tanpa SMOTE, model cenderung selalu prediksi Normal karena dominant class.',
+      dosenComment: 'SMOTE pada data time series bisa problematik — apa Anda yakin interpolasi antar sinyal EKG menghasilkan sinyal yang valid secara fisiologis?'
+    },
+    {
+      chapter: 'bab4', chapterLabel: 'BAB IV',
+      question: 'Sensitivity Anda hanya 68.42%. Dalam konteks medis, apa dampaknya jika sensitivity rendah? Bukankah ini berbahaya?',
+      context: 'Pertanyaan kritis tentang implikasi klinis.',
+      keyAnswer: 'Sensitivity 68.42% berarti <strong>31.58% pasien AFib tidak terdeteksi</strong> (False Negative). Dalam konteks medis, ini <strong>sangat berbahaya</strong> karena pasien yang seharusnya didiagnosis AFib akan lolos tanpa penanganan — berisiko <strong>stroke dan komplikasi kardiovaskular</strong>. Untuk screening tool, <strong>sensitivity idealnya >90%</strong>. Penyebab utama rendahnya sensitivity: (1) kualitas sinyal nanokomposit yang masih noisy, (2) jumlah data AFib yang sedikit (19 window), (3) labeling tanpa validasi dokter. Ini menjadi <strong>area utama yang harus diperbaiki</strong>.',
+      dosenComment: 'Dalam dunia medis, False Negative bisa berarti nyawa. Anda harus sangat aware dengan implikasi ini.'
+    },
+    {
+      chapter: 'bab4', chapterLabel: 'BAB IV',
+      question: 'Training accuracy 100% tapi testing accuracy 91.13%. Ini indikasi overfitting. Bagaimana Anda menyangkalnya?',
+      context: 'Gap antara training dan testing performance.',
+      keyAnswer: 'Training accuracy 100% memang mengindikasikan model <strong>menghafal data training</strong>. Namun validasi accuracy 91.87% menunjukkan model masih bisa <strong>generalize cukup baik</strong>. Beberapa mitigasi: (1) <strong>Dropout 0.1</strong> diterapkan, (2) model diuji pada <strong>data yang benar-benar baru</strong> (data primer, bukan split dari training). Namun perlu diakui bahwa <strong>overfitting memang terjadi</strong> dan bisa dimitigasi dengan: augmentasi data, regularisasi lebih kuat, early stopping, dan <strong>data training yang lebih besar</strong>.',
+      dosenComment: 'Overfitting adalah dosa besar dalam machine learning. 100% training accuracy itu red flag besar.'
+    },
+    {
+      chapter: 'bab4', chapterLabel: 'BAB IV',
+      question: 'Mengapa selisih amplitudo P-wave antara konvensional dan nanokomposit mencapai 95.23%? Apa penyebabnya?',
+      context: 'Parameter karakterisasi yang paling menyimpang.',
+      keyAnswer: 'Selisih besar amplitudo P-wave (Konv: 0.21 mV vs Nano: 0.41 mV) disebabkan oleh: (1) <strong>Impedansi kontak lebih tinggi</strong> pada nanokomposit (dry electrode) yang menyebabkan noise floor meningkat, (2) <strong>Artefak motion</strong> yang lebih besar karena tidak ada gel perekat, (3) Noise baseline yang <strong>terakumulasi di rentang frekuensi rendah</strong> (di mana gelombang P berada, 0.5-10 Hz), sehingga amplitudo yang terukur <strong>tercampur dengan noise</strong> dan terlihat lebih besar. Ini menunjukkan bahwa P-wave detection pada nanokomposit <strong>kurang reliable</strong>.',
+      dosenComment: 'Kalau P-wave saja tidak bisa dideteksi dengan baik, bagaimana Anda bisa bilang sistemnya mendeteksi aritmia?'
+    },
+    {
+      chapter: 'umum', chapterLabel: 'UMUM',
+      question: 'Apa kontribusi utama dari penelitian Anda? Apa yang baru dan belum pernah dilakukan sebelumnya?',
+      context: 'Novelty dan kontribusi ilmiah.',
+      keyAnswer: 'Kontribusi utama: (1) <strong>Evaluasi pertama</strong> performa CAT-Net pada data dari elektroda nanokomposit silvertape (AgNP) — paper original Islam et al. (2024) hanya menggunakan dataset benchmark MIT-BIH, (2) <strong>Analisis komparatif komprehensif</strong> antara elektroda konvensional dan nanokomposit dalam konteks klasifikasi deep learning, (3) <strong>Identifikasi bottleneck</strong> utama: kualitas sinyal (SNR) sebagai faktor dominan yang mempengaruhi performa klasifikasi pada wearable EKG berbasis dry electrode.',
+      dosenComment: 'Kontribusi harus jelas — apakah Anda memajukan ilmu pengetahuan atau hanya mengulang yang sudah ada?'
+    }
+  ],
+
+  hard: [
+    {
+      chapter: 'bab1', chapterLabel: 'BAB I',
+      question: 'Anda bilang penelitian ini untuk "deteksi dini aritmia". Tapi sistem Anda hanya klasifikasi offline — bagaimana ini bisa disebut "deteksi dini" kalau datanya diproses setelah perekaman? Bukankah judul Anda menyesatkan?',
+      context: '🔥 Dosen killer menyerang inkonsistensi antara klaim dan implementasi.',
+      keyAnswer: 'Benar bahwa implementasi saat ini adalah <strong>offline classification</strong> — data direkam dulu, lalu diproses. "Deteksi dini" dalam konteks ini merujuk pada kemampuan <strong>screening awal tanpa harus ke rumah sakit</strong>, bukan real-time detection. Wearable EKG memungkinkan pengambilan data <strong>kapan saja dan di mana saja</strong>, sehingga potensi aritmia bisa terdeteksi lebih awal. Namun untuk true real-time detection, dibutuhkan <strong>edge inference pada Raspberry Pi</strong> atau dedicated hardware — ini menjadi saran pengembangan. Saya akui istilah "deteksi dini" lebih merujuk pada <strong>skrining, bukan diagnosis real-time</strong>.',
+      dosenComment: 'Kalau Anda sendiri tidak bisa mendefinisikan "deteksi dini" dengan presisi, bagaimana pembaca akan memahami kontribusi Anda?'
+    },
+    {
+      chapter: 'bab1', chapterLabel: 'BAB I',
+      question: 'Rumusan masalah pertama Anda menanyakan "pengaruh elektroda nanokomposit terhadap kualitas sinyal". Tapi Anda tidak punya kontrol eksperimen yang ketat — partisipan yang sama, waktu yang sama, posisi yang sama. Bagaimana Anda bisa mengklaim ada "pengaruh"?',
+      context: '🔥 Menyerang validitas desain eksperimen.',
+      keyAnswer: 'Ini kritik yang valid. Idealnya, untuk mengisolasi <strong>pengaruh elektroda</strong>, dibutuhkan <strong>simultaneous recording</strong> dengan kedua jenis elektroda pada posisi identik dan waktu bersamaan. Dalam penelitian ini, akuisisi dilakukan <strong>bergantian</strong> (bukan simultan), sehingga ada variabel confounding: <strong>kondisi fisiologis partisipan bisa berubah</strong> antar sesi. Untuk mitigasi, prosedur dibuat <strong>semirip mungkin</strong> (treadmill + pemulihan). Namun saya mengakui ini merupakan <strong>keterbatasan desain eksperimen</strong> yang tidak bisa sepenuhnya meng-attribute perbedaan hanya pada jenis elektroda.',
+      dosenComment: 'Tanpa kontrol yang ketat, hasil Anda tidak bisa diklaim kausalitas — hanya korelasi paling.'
+    },
+    {
+      chapter: 'bab2', chapterLabel: 'BAB II',
+      question: 'Transformer encoder Anda hanya 1 layer dengan 4 heads dan dimensi 128. Di paper asli Islam et al. (2024), konfigurasinya seperti apa? Apakah Anda memodifikasi? Kalau iya, apa justifikasinya? Kalau tidak, mengapa mengklaim ini sesuai paper?',
+      context: '🔥 Menggali kedalaman pemahaman arsitektur.',
+      keyAnswer: 'Konfigurasi model mengikuti <strong>paper Islam et al. (2024)</strong>: 1 Transformer Encoder layer, 4 heads, d_model=128, feed-forward dim=512. Ini bukan modifikasi — paper original memang menggunakan <strong>single transformer encoder layer</strong> karena input sudah melalui 4 blok CNN + attention yang mengekstrak fitur high-level. Transformer di sini berfungsi sebagai <strong>global context modeling</strong>, bukan sebagai backbone utama. Justifikasi: model yang lebih deep transformer akan <strong>overfitting pada dataset kecil</strong>. Total parameter hanya ~634K, relatif ringan.',
+      dosenComment: 'Anda harus bisa membedakan antara mengikuti paper dan memahami mengapa paper memilih konfigurasi tersebut.'
+    },
+    {
+      chapter: 'bab3', chapterLabel: 'BAB III',
+      question: 'Anda menggunakan Pan-Tompkins untuk deteksi R-peak, tapi algoritma ini didesain untuk EKG clinical-grade. Apakah Pan-Tompkins masih valid untuk sinyal wearable EKG yang noisy dengan SNR hanya 1.80 dB?',
+      context: '🔥 Menyerang validitas algoritma pada data berkualitas rendah.',
+      keyAnswer: 'Pertanyaan yang sangat kritis. Pan-Tompkins memang didesain untuk EKG <strong>SNR tinggi</strong>. Pada SNR 1.80 dB, algoritma ini rentan terhadap: (1) <strong>False positive R-peaks</strong> dari noise spikes, (2) <strong>Missed R-peaks</strong> jika amplitudo R terbenam dalam noise. Mitigasi yang dilakukan: <strong>pre-processing (bandpass + DWT) sebelum R-peak detection</strong>, sehingga sinyal sudah lebih bersih saat masuk Pan-Tompkins. Namun, alternatif yang lebih robust seperti <strong>Hamilton, Engelse-Zeelenberg, atau deep learning-based R-peak detector</strong> bisa menjadi pilihan yang lebih baik untuk sinyal noisy.',
+      dosenComment: 'Anda sedang membangun rumah di atas fondasi yang tidak kokoh. Kalau R-peak detection-nya salah, labeling-nya salah, klasifikasinya juga salah — semuanya runtuh.'
+    },
+    {
+      chapter: 'bab3', chapterLabel: 'BAB III',
+      question: 'Anda menghapus approximation coefficient (coeffs[0] = zeros) pada DWT denoising. Bukankah ini menghilangkan informasi frekuensi rendah yang penting? Gelombang P dan T ada di frekuensi rendah!',
+      context: '🔥 Detail implementasi yang bisa jadi fatal flaw. (Referensi: labeling_konv.py line 48)',
+      keyAnswer: 'Benar, menghapus <strong>approximation coefficient (cA5)</strong> berarti menghilangkan komponen frekuensi <strong>di bawah ~4 Hz</strong> pada level 5 dekomposisi (fs=250Hz). Gelombang P (0.5-10 Hz) dan T (1-7 Hz) memang memiliki komponen di rentang ini. Namun, tidak semua energi P dan T ada di cA5 — sebagian besar energi masih ada di <strong>detail coefficients (cD1–cD5)</strong>. Selain itu, <strong>bandpass filter 0.5-40 Hz sudah diterapkan sebelumnya</strong>, sehingga baseline drift sudah dihilangkan. Namun ini memang bisa menyebabkan <strong>attenuasi gelombang P dan T</strong> — pendekatan yang lebih baik adalah <strong>tidak menghapus cA5</strong> sepenuhnya, melainkan juga menerapkan thresholding.',
+      dosenComment: 'Anda menghapus informasi yang Anda butuhkan. Ini kontradiksi fundamental dalam metode Anda.'
+    },
+    {
+      chapter: 'bab3', chapterLabel: 'BAB III',
+      question: 'Hanya 124 window untuk testing, dengan 19 AFib dan 105 Normal. Dengan jumlah data sekecil ini, confidence interval dari metrik Anda pasti sangat lebar. Apakah Anda menghitung confidence interval? Bisakah Anda bilang hasilnya statistically significant?',
+      context: '🔥 Menghantam validitas statistik.',
+      keyAnswer: 'Benar, 124 window adalah <strong>sangat sedikit</strong> untuk evaluasi model deep learning. Saya <strong>tidak menghitung confidence interval</strong> — ini memang keterbatasan. Dengan 19 AFib, satu FN saja mengubah sensitivity ~5%. Jika dihitung 95% CI untuk sensitivity (68.42%): dengan metode Wilson interval, CI akan sangat lebar, sekitar <strong>45–85%</strong>. Ini berarti <strong>true sensitivity bisa serendah 45%</strong>. Untuk hasil yang statistically significant, dibutuhkan <strong>minimal ratusan sampel per kelas</strong>. Ini merupakan <strong>kelemahan utama</strong> yang harus diakui.',
+      dosenComment: 'Tanpa confidence interval, angka-angka Anda tidak bermakna secara statistik. Ini bukan skripsi yang bisa mentoleransi kelemahan fundamental seperti ini.'
+    },
+    {
+      chapter: 'bab4', chapterLabel: 'BAB IV',
+      question: 'Anda mengatakan "model CAT-Net sudah cukup baik mendekati Islam et al. (2024)". Tapi Islam et al. melakukan 5-class classification pada MIT-BIH, sedangkan Anda hanya 2-class pada data sendiri. Apakah perbandingan ini fair?',
+      context: '🔥 Menyerang perbandingan yang tidak apple-to-apple.',
+      keyAnswer: 'Perbandingan ini memang <strong>tidak apple-to-apple</strong>. Perbedaan utama: (1) Islam et al. menggunakan <strong>MIT-BIH dataset (benchmark, clean signals)</strong> vs data primer saya yang <strong>noisy dari wearable</strong>, (2) mereka melakukan <strong>5-class classification</strong> (N, S, V, F, Q) vs saya <strong>2-class</strong> (Normal vs AFib), (3) distribusi data dan jumlah sampel sangat berbeda. Yang bisa dibandingkan hanyalah <strong>arsitektur model yang sama</strong>. Klaim saya seharusnya lebih tepat: "arsitektur CAT-Net <strong>masih dapat mengklasifikasikan</strong> meskipun pada data wearable nanokomposit yang lebih menantang."',
+      dosenComment: 'Perbandingan yang tidak adil itu sama saja dengan manipulasi data. Saya harap Anda tidak bermaksud demikian.'
+    },
+    {
+      chapter: 'bab4', chapterLabel: 'BAB IV',
+      question: 'Di confusion matrix ada 5 False Positive — artinya 5 orang sehat dibilang AFib. Dan 6 False Negative — 6 orang AFib lolos. Mana yang lebih berbahaya? Dan kalau model Anda dipasarkan, apakah secara etis bisa diterima?',
+      context: '🔥 Menyerang implikasi etis dan keselamatan pasien.',
+      keyAnswer: '<strong>False Negative (FN=6) jauh lebih berbahaya</strong> karena pasien AFib yang tidak terdeteksi berisiko <strong>stroke, gagal jantung, dan kematian</strong>. False Positive (FP=5) menyebabkan <strong>kecemasan berlebih dan pemeriksaan lanjutan yang tidak perlu</strong>, tapi tidak langsung membahayakan nyawa. Secara etis, model ini <strong>belum bisa dipasarkan</strong> karena: (1) sensitivity masih rendah (68.42%), (2) belum divalidasi oleh dokter spesialis, (3) belum melewati <strong>uji klinis dan sertifikasi alat kesehatan</strong>. Sistem ini saat ini hanya bisa dikategorikan sebagai <strong>screening tool</strong>, bukan diagnostic tool — dan harus disertai disclaimer.',
+      dosenComment: 'Kalau alat Anda dipakai dan ada pasien yang meninggal karena AFib tidak terdeteksi, siapa yang bertanggung jawab? Pikirkan itu.'
+    },
+    {
+      chapter: 'bab4', chapterLabel: 'BAB IV',
+      question: 'Loss testing Anda 0.955 — itu hampir 1.0 untuk binary cross-entropy. Ini berarti model Anda sebenarnya tidak yakin dengan prediksinya. Bagaimana Anda menjelaskan akurasi 91% tapi loss hampir 1?',
+      context: '🔥 Inkonsistensi antara akurasi dan loss value.',
+      keyAnswer: 'Loss 0.955 memang <strong>tinggi untuk binary cross-entropy</strong>. Ini terjadi karena: (1) <strong>Domain shift</strong> antara data training (Kaggle) dan testing (data primer nanokomposit) menyebabkan distribusi probability output bergeser, (2) Model mungkin <strong>prediksi benar tapi dengan confidence rendah</strong> (misalnya 0.55 vs 0.45), (3) Beberapa misklasifikasi memiliki <strong>confidence sangat tinggi (97-100%)</strong> yang menyumbang loss besar. Akurasi tinggi + loss tinggi menunjukkan model <strong>"beruntung" benar pada banyak kasus tapi secara probabilistik tidak calibrated</strong>. Ini red flag bahwa model perlu <strong>calibration</strong>.',
+      dosenComment: 'Akurasi tinggi tapi loss juga tinggi? Itu artinya model Anda like a broken clock — benar dua kali sehari tapi sebenarnya tidak berfungsi.'
+    },
+    {
+      chapter: 'umum', chapterLabel: 'UMUM',
+      question: 'Kalau saya minta Anda mengulangi seluruh penelitian ini dari awal, apa yang akan Anda ubah? Sebutkan minimal 5 hal yang berbeda.',
+      context: '🔥 Pertanyaan refleksi yang menguji kedalaman pemahaman atas kelemahan sendiri.',
+      keyAnswer: '5 hal yang akan saya ubah: (1) <strong>Simultaneous recording</strong> dengan kedua jenis elektroda pada waktu bersamaan untuk perbandingan yang valid, (2) <strong>Labeling oleh dokter spesialis jantung</strong> menggunakan EKG 12-lead sebagai gold standard, (3) <strong>Tidak menghapus cA5 pada DWT</strong>, melainkan menggunakan adaptive thresholding, (4) <strong>Fine-tuning model</strong> pada sebagian data primer (transfer learning) alih-alih langsung testing, (5) <strong>Jumlah partisipan dan data jauh lebih banyak</strong> — minimal 500+ window per kelas. Tambahan: gunakan <strong>k-fold cross-validation</strong> dan hitung confidence interval untuk semua metrik.',
+      dosenComment: 'Jawaban ini menentukan apakah Anda belajar dari penelitian ini atau hanya menyelesaikan tugas.'
+    }
+  ]
+};
+
+// ════════════════════════════════════
+// DOSEN KILLER PERSONAS
+// ════════════════════════════════════
+
+const DOSEN_PERSONAS = {
+  easy: [
+    { name: 'Dr. Santoso, M.T.', mood: 'Ingin memastikan pemahaman dasar Anda...', avatar: '🧑‍🏫' },
+    { name: 'Prof. Sari, Ph.D.', mood: 'Pertanyaan standar dulu ya...', avatar: '👩‍🏫' },
+  ],
+  medium: [
+    { name: 'Dr. Ir. Wijaya, M.Eng.', mood: 'Saya ragu dengan klaim Anda...', avatar: '😤' },
+    { name: 'Prof. Dr. Kusuma', mood: 'Coba jelaskan lebih dalam...', avatar: '🤨' },
+  ],
+  hard: [
+    { name: 'Prof. Dr. Ir. Killer, IPM.', mood: 'Saya tidak puas dengan jawaban Anda...', avatar: '👿' },
+    { name: 'Prof. Dr. Haryanto, DEA.', mood: 'Ini pertanyaan mudah seharusnya...', avatar: '💀' },
+    { name: 'Dr. Ir. Setiawan, M.Sc., Ph.D.', mood: 'Fondasi Anda lemah...', avatar: '🔥' },
+  ]
+};
+
+const DOSEN_MOODS_HARD = [
+  'Saya tidak puas dengan jawaban Anda...',
+  'Ini harusnya mudah buat mahasiswa S1...',
+  'Coba pikir lagi, jawaban tadi tidak meyakinkan.',
+  'Saya masih menunggu jawaban yang berbobot...',
+  'Apakah Anda benar-benar membaca paper referensi?',
+  'Jelaskan tanpa membaca catatan!',
+  'Saya beri waktu 10 detik lagi...',
+  '*memandang tajam sambil mengetuk meja*',
+  'Saya mulai meragukan pemahaman Anda...',
+  'Mahasiswa sebelumnya menjawab lebih baik dari ini.'
+];
+
+// ════════════════════════════════════
+// GAME STATE
+// ════════════════════════════════════
+
+let state = {
+  difficulty: 'easy',
+  questions: [],
+  currentQ: 0,
+  score: 0,
+  answers: [],
+  timer: null,
+  timeLeft: 0,
+  timePerQ: 120,
+  answerRevealed: false,
+  rated: false
+};
+
+// ════════════════════════════════════
+// FUNCTIONS
+// ════════════════════════════════════
+
+function shuffleArray(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function startQuiz(difficulty) {
+  state.difficulty = difficulty;
+  state.questions = shuffleArray(QUESTIONS[difficulty]);
+  state.currentQ = 0;
+  state.score = 0;
+  state.answers = [];
+  state.timePerQ = difficulty === 'easy' ? 120 : difficulty === 'medium' ? 90 : 60;
+
+  showScreen('screenQuiz');
+  loadQuestion();
+}
+
+function loadQuestion() {
+  const q = state.questions[state.currentQ];
+  state.answerRevealed = false;
+  state.rated = false;
+
+  // Update topbar
+  document.getElementById('qCounter').textContent = `${state.currentQ + 1} / ${state.questions.length}`;
+  document.getElementById('qChapter').textContent = q.chapterLabel;
+  document.getElementById('qChapter').className = 'q-chapter ' + q.chapter;
+  document.getElementById('scoreDisplay').textContent = state.score;
+
+  // Progress bar
+  document.getElementById('progressFill').style.width = `${((state.currentQ) / state.questions.length) * 100}%`;
+
+  // Dosen persona
+  const personas = DOSEN_PERSONAS[state.difficulty];
+  const persona = personas[Math.floor(Math.random() * personas.length)];
+  document.getElementById('dosenName').textContent = persona.name;
+
+  if (state.difficulty === 'hard') {
+    document.getElementById('dosenMood').textContent = DOSEN_MOODS_HARD[Math.floor(Math.random() * DOSEN_MOODS_HARD.length)];
+  } else {
+    document.getElementById('dosenMood').textContent = persona.mood;
+  }
+
+  const avatarEl = document.querySelector('.dosen-avatar');
+  avatarEl.textContent = persona.avatar;
+
+  // Question content
+  document.getElementById('questionText').textContent = q.question;
+  const contextEl = document.getElementById('questionContext');
+  if (q.context) {
+    contextEl.textContent = q.context;
+    contextEl.style.display = 'block';
+  } else {
+    contextEl.style.display = 'none';
+  }
+
+  // Reset answer area
+  document.getElementById('answerInput').value = '';
+  document.getElementById('answerInput').disabled = false;
+  document.getElementById('keyAnswerArea').innerHTML = '';
+  document.getElementById('ratingArea').innerHTML = '';
+  document.getElementById('btnReveal').style.display = '';
+  document.getElementById('btnSkip').style.display = '';
+  document.getElementById('btnNext').textContent = state.currentQ === state.questions.length - 1 ? '🏁 Selesai' : 'Lanjut →';
+
+  // Start timer
+  startTimer();
+
+  // Focus
+  setTimeout(() => document.getElementById('answerInput').focus(), 300);
+}
+
+function startTimer() {
+  clearInterval(state.timer);
+  state.timeLeft = state.timePerQ;
+  updateTimerDisplay();
+
+  state.timer = setInterval(() => {
+    state.timeLeft--;
+    updateTimerDisplay();
+
+    if (state.timeLeft <= 0) {
+      clearInterval(state.timer);
+      revealAnswer();
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const display = document.getElementById('timerDisplay');
+  display.textContent = state.timeLeft;
+
+  display.classList.remove('warning', 'danger');
+  if (state.timeLeft <= 10) {
+    display.classList.add('danger');
+  } else if (state.timeLeft <= 30) {
+    display.classList.add('warning');
+  }
+}
+
+function revealAnswer() {
+  if (state.answerRevealed) return;
+  state.answerRevealed = true;
+  clearInterval(state.timer);
+
+  const q = state.questions[state.currentQ];
+
+  document.getElementById('keyAnswerArea').innerHTML = `
+    <div class="key-answer">
+      <div class="ka-header">🔑 Kunci Jawaban</div>
+      <div class="ka-body">${q.keyAnswer}</div>
+      ${q.dosenComment ? `<div class="dosen-comment">💬 "${q.dosenComment}"</div>` : ''}
+    </div>
+  `;
+
+  document.getElementById('ratingArea').innerHTML = `
+    <div class="rating-section">
+      <div class="rating-label">Bagaimana kualitas jawabanmu?</div>
+      <div class="rating-buttons">
+        <button class="rate-btn rate-bad" onclick="rateAnswer(0, this)">😰 Tidak Bisa</button>
+        <button class="rate-btn rate-ok" onclick="rateAnswer(1, this)">😕 Kurang</button>
+        <button class="rate-btn rate-good" onclick="rateAnswer(2, this)">😊 Cukup Baik</button>
+        <button class="rate-btn rate-great" onclick="rateAnswer(3, this)">🔥 Sempurna</button>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('btnReveal').style.display = 'none';
+  document.getElementById('btnSkip').style.display = 'none';
+}
+
+function rateAnswer(rating, btnEl) {
+  if (state.rated) return;
+  state.rated = true;
+
+  // Highlight selected
+  document.querySelectorAll('.rate-btn').forEach(b => b.classList.remove('selected'));
+  btnEl.classList.add('selected');
+
+  state.score += rating;
+  document.getElementById('scoreDisplay').textContent = state.score;
+
+  const q = state.questions[state.currentQ];
+  state.answers.push({
+    question: q.question,
+    chapter: q.chapterLabel,
+    answer: document.getElementById('answerInput').value,
+    keyAnswer: q.keyAnswer,
+    rating: rating,
+    timeUsed: state.timePerQ - state.timeLeft
+  });
+}
+
+function skipQuestion() {
+  clearInterval(state.timer);
+
+  const q = state.questions[state.currentQ];
+  state.answers.push({
+    question: q.question,
+    chapter: q.chapterLabel,
+    answer: '(Dilewati)',
+    keyAnswer: q.keyAnswer,
+    rating: -1,
+    timeUsed: 0
+  });
+
+  advance();
+}
+
+function nextQuestion() {
+  if (state.answerRevealed && !state.rated) {
+    // Force rate
+    const q = state.questions[state.currentQ];
+    state.answers.push({
+      question: q.question,
+      chapter: q.chapterLabel,
+      answer: document.getElementById('answerInput').value,
+      keyAnswer: q.keyAnswer,
+      rating: 0,
+      timeUsed: state.timePerQ - state.timeLeft
+    });
+  } else if (!state.answerRevealed) {
+    // Auto-reveal then next
+    revealAnswer();
+    return;
+  }
+
+  advance();
+}
+
+function advance() {
+  state.currentQ++;
+  if (state.currentQ >= state.questions.length) {
+    showResults();
+  } else {
+    loadQuestion();
+  }
+}
+
+function showResults() {
+  clearInterval(state.timer);
+  showScreen('screenResults');
+
+  const maxScore = state.questions.length * 3;
+  const pct = (state.score / maxScore) * 100;
+
+  let grade, verdict, subtitle, gradeClass;
+  if (pct >= 85) {
+    grade = 'A'; gradeClass = 'grade-a';
+    verdict = '🏆 Sangat Siap Sidang!';
+    subtitle = 'Dosen killer pun akan terdiam oleh jawabanmu.';
+    launchConfetti();
+  } else if (pct >= 70) {
+    grade = 'B+'; gradeClass = 'grade-b';
+    verdict = '✅ Cukup Siap';
+    subtitle = 'Beberapa area masih perlu diperkuat sebelum hari H.';
+  } else if (pct >= 50) {
+    grade = 'C'; gradeClass = 'grade-c';
+    verdict = '⚠️ Perlu Persiapan Lagi';
+    subtitle = 'Masih banyak pertanyaan yang belum bisa dijawab dengan baik.';
+  } else {
+    grade = 'D'; gradeClass = 'grade-d';
+    verdict = '🚨 Belum Siap!';
+    subtitle = 'Pelajari ulang seluruh materi TA sebelum sidang.';
+  }
+
+  document.getElementById('resGrade').textContent = grade;
+  document.getElementById('resGrade').className = 'results-grade ' + gradeClass;
+  document.getElementById('resVerdict').textContent = verdict;
+  document.getElementById('resSubtitle').textContent = subtitle;
+
+  // Stats
+  let great = 0, good = 0, ok = 0, bad = 0, skip = 0;
+  state.answers.forEach(a => {
+    if (a.rating === 3) great++;
+    else if (a.rating === 2) good++;
+    else if (a.rating === 1) ok++;
+    else if (a.rating === 0) bad++;
+    else skip++;
+  });
+
+  document.getElementById('statScore').textContent = `${state.score}/${maxScore}`;
+  document.getElementById('statGreat').textContent = great + good;
+  document.getElementById('statOk').textContent = ok;
+  document.getElementById('statBad').textContent = bad + skip;
+
+  // Breakdown
+  const section = document.getElementById('breakdownSection');
+  section.innerHTML = '<div class="breakdown-title">📋 Detail Per Pertanyaan</div>';
+
+  state.answers.forEach((a, i) => {
+    let scoreClass, scoreText;
+    if (a.rating === 3) { scoreClass = 's-great'; scoreText = '🔥 Sempurna'; }
+    else if (a.rating === 2) { scoreClass = 's-good'; scoreText = '✅ Baik'; }
+    else if (a.rating === 1) { scoreClass = 's-ok'; scoreText = '⚠️ Kurang'; }
+    else if (a.rating === 0) { scoreClass = 's-bad'; scoreText = '❌ Tidak Bisa'; }
+    else { scoreClass = 's-skip'; scoreText = '⏭ Dilewati'; }
+
+    const item = document.createElement('div');
+    item.className = 'breakdown-item';
+    item.innerHTML = `
+      <div class="bi-top">
+        <span class="bi-q">${a.chapter} — ${a.question.substring(0, 80)}${a.question.length > 80 ? '...' : ''}</span>
+        <span class="bi-score ${scoreClass}">${scoreText}</span>
+      </div>
+      <div class="bi-detail">
+        <div class="your-answer"><strong>Jawaban Anda:</strong><br>${a.answer || '(Tidak dijawab)'}</div>
+        <div class="key-answer-mini"><strong>Kunci Jawaban:</strong><br>${a.keyAnswer}</div>
+      </div>
+    `;
+    item.addEventListener('click', () => item.classList.toggle('open'));
+    section.appendChild(item);
+  });
+}
+
+function launchConfetti() {
+  const colors = ['#ff2d55', '#ff9500', '#30d158', '#0a84ff', '#bf5af2', '#ffd60a'];
+  for (let i = 0; i < 60; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.left = Math.random() * 100 + 'vw';
+    piece.style.animationDuration = (2 + Math.random() * 2) + 's';
+    piece.style.animationDelay = Math.random() * 1 + 's';
+    piece.style.width = (6 + Math.random() * 8) + 'px';
+    piece.style.height = (6 + Math.random() * 8) + 'px';
+    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    document.body.appendChild(piece);
+    setTimeout(() => piece.remove(), 4000);
+  }
+}
+</script>
+</body>
+</html>
